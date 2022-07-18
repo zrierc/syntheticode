@@ -1,5 +1,5 @@
 #!/bin/bash
-APPDIR='/var/www/html'
+APPDIR='/usr/share/nginx/html'
 
 # update repo
 yum update -y
@@ -11,13 +11,14 @@ yum install git -y
 amazon-linux-extras install nginx1.12
 
 # check directory app
-if [ ! -d $APPDIR ]; then
+if [ -d $APPDIR ]; then
+  rm -rf APPDIR/*
+else
   mkdir $APPDIR
 fi
-
 # clone app
 git clone https://github.com/Hextris/hextris.git $APPDIR
 
-# enable web server
+# start web server
 systemctl enable nginx
 systemctl start nginx

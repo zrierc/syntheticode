@@ -4,14 +4,10 @@
 
 // example test. To run these tests, uncomment this file along with the
 // example resource in lib/syntheticode-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new Syntheticode.SyntheticodeStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
-
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
+test('test code', () => {
+  //   const app = new cdk.App();
+  //     // WHEN
+  //   const stack = new Syntheticode.SyntheticodeStack(app, 'MyTestStack');
+  //     // THEN
+  //   const template = Template.fromStack(stack);
 });

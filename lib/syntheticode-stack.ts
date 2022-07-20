@@ -1,4 +1,5 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as autoScaling from 'aws-cdk-lib/aws-autoscaling';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -54,7 +55,7 @@ export class SyntheticodeStack extends Stack {
         ec2.InstanceSize.MICRO
       ),
       machineImage: image,
-      minCapacity: 1,
+      minCapacity: 2,
       maxCapacity: 3,
       securityGroup: serverSG,
     });
@@ -92,5 +93,15 @@ export class SyntheticodeStack extends Stack {
     });
 
     listener.connections.allowDefaultPortFromAnyIpv4('open to the world');
+
+    // * Create scaling rule (example)
+    serverGroup.scaleOnCpuUtilization('scaleByCPU', {
+      targetUtilizationPercent: 70,
+    });
+
+    // * Output LB endpoint
+    new cdk.CfnOutput(this, 'ALB Endpoint', {
+      value: alb.loadBalancerDnsName,
+    });
   }
 }

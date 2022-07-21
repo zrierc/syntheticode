@@ -100,9 +100,7 @@ export class SyntheticodeStack extends Stack {
       targets: [serverGroup],
     });
 
-    listener.connections.allowDefaultPortFromAnyIpv4('open to the world');
-
-    // * Create scaling rule (example)
+    // * Create scaling rule (just for example)
     serverGroup.scaleOnCpuUtilization('scaleByCPU', {
       targetUtilizationPercent: 70,
     });

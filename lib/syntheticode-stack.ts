@@ -13,12 +13,17 @@ export class SyntheticodeStack extends Stack {
 
     // * Define VPC
     const vpc = new ec2.Vpc(this, 'alb-vpc', {
-      natGateways: 0,
+      natGateways: 1,
       subnetConfiguration: [
         {
           cidrMask: 26,
-          name: 'public-subnet',
+          name: 'public',
           subnetType: ec2.SubnetType.PUBLIC,
+        },
+        {
+          cidrMask: 26,
+          name: 'private',
+          subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
         },
       ],
     });
@@ -57,6 +62,9 @@ export class SyntheticodeStack extends Stack {
       machineImage: image,
       minCapacity: 2,
       maxCapacity: 3,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
+      },
       securityGroup: serverSG,
     });
 

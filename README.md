@@ -3,7 +3,7 @@
 ## Overview Architecture
 
 <p align="center">
-  <img width="600" height="auto" src="docs/assets/alb-with-natgw.png" alt="EC2 Web Server Architecture">
+  <img width="600" height="auto" src="docs/assets/alb-with-natgw.png" alt="ALB with NATGW Architecture">
 </p>
 
 This project creates:

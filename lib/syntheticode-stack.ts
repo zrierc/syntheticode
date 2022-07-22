@@ -30,7 +30,7 @@ export class SyntheticodeStack extends Stack {
 
     // * Deploy S3 as static site
     new s3Deploy.BucketDeployment(this, 'DeployWebsite', {
-      sources: [s3Deploy.Source.asset(path.join(__dirname, '../src'))],
+      sources: [s3Deploy.Source.asset(path.join(__dirname, '../website'))],
       destinationBucket: webBucket,
       distribution: cdn,
       distributionPaths: ['/*'],

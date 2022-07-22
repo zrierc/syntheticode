@@ -1,6 +1,5 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import * as cdk from 'aws-cdk-lib';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as s3 from 'aws-cdk-lib/aws-s3';
@@ -15,9 +14,7 @@ export class SyntheticodeStack extends Stack {
     // * Define Bucket
     const webBucket = new s3.Bucket(this, 'webBucket', {
       bucketName: 'static-web-cdk',
-      publicReadAccess: true,
       websiteIndexDocument: 'index.html',
-      enforceSSL: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
@@ -26,6 +23,7 @@ export class SyntheticodeStack extends Stack {
     const cdn = new cloudFront.Distribution(this, 'webDist', {
       defaultBehavior: {
         origin: new origins.S3Origin(webBucket),
+        viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       defaultRootObject: 'index.html',
     });
@@ -34,15 +32,12 @@ export class SyntheticodeStack extends Stack {
     new s3Deploy.BucketDeployment(this, 'DeployWebsite', {
       sources: [s3Deploy.Source.asset(path.join(__dirname, '../src'))],
       destinationBucket: webBucket,
-      distributionPaths: ['/*'],
       distribution: cdn,
+      distributionPaths: ['/*'],
       retainOnDelete: false,
     });
 
     // * Output the Endpoint
-    new cdk.CfnOutput(this, 'staticWebEndpoint', {
-      value: webBucket.bucketWebsiteUrl,
-    });
     new cdk.CfnOutput(this, 'CDNDomainName', {
       value: cdn.distributionDomainName,
     });

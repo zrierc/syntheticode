@@ -23,12 +23,14 @@ export class Rds extends Construct {
 
     // * Define db cluster
     this.dbInstance = new rds.DatabaseCluster(this, 'dbInstance', {
-      engine: rds.DatabaseClusterEngine.AURORA_MYSQL,
+      engine: rds.DatabaseClusterEngine.auroraMysql({
+        version: rds.AuroraMysqlEngineVersion.VER_3_02_0,
+      }),
       instanceProps: {
         vpc,
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.BURSTABLE3,
-          ec2.InstanceSize.SMALL
+          ec2.InstanceSize.MEDIUM
         ),
         vpcSubnets: vpc.selectSubnets({
           subnetType: ec2.SubnetType.PUBLIC,
@@ -39,9 +41,9 @@ export class Rds extends Construct {
       credentials: rds.Credentials.fromGeneratedSecret('admin', {
         secretName: 'DMSSecret',
       }),
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // ! Not for Prod
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    this.dbInstance.connections.allowDefaultPortFromAnyIpv4('open to world'); // ! Not for Prod
+    this.dbInstance.connections.allowDefaultPortFromAnyIpv4('open to world');
   }
 }

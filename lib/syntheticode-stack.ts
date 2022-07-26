@@ -47,8 +47,8 @@ export class SyntheticodeStack extends Stack {
       value: rdsInstance.dbInstance.secret?.secretName!,
     });
     new cdk.CfnOutput(this, 'DB Get Auth', {
-      value: `aws secretmanager get-secret-value --secret-id ${rdsInstance
-        .dbInstance.secret?.secretName!} --output json`,
+      value: `aws secretsmanager get-secret-value --secret-id ${rdsInstance
+        .dbInstance.secret?.secretName!} --output json > dbAuthInfo.txt`,
     });
   }
 }

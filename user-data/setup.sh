@@ -1,7 +1,10 @@
 #!/bin/bash
-DATADIR="/sampleData"
-MYSQL_DEFAULT_PASWORD=$(grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')
-MYSQL_PASSWORD="admin123"
+DATADIR="/dms-sample"
+MYSQL_DEFAULT_PASSWORD=$(grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')
+MYSQL_NEW_PASSWORD="C0b4-Database"
+LOCAL_IP=$(dig "$(hostname)" +short)
+
+echo "${LOCAL_HOST_IP}"
 
 # update repo
 yum update -y
@@ -21,13 +24,23 @@ else
 fi
 
 # clone sample db
-git clone https://github.com/aws-samples/aws-database-migration-samples.git "$DATADIR"
+git clone https://github.com/datacharmer/test_db.git "${DATADIR}/data/"
 
 # Start DB
 systemctl start mysqld
 systemctl enable mysqld
 
-# Configure DB
-mysql -uroot -p"${MYSQL_DEFAULT_PASWORD}" -e "GRANT ALL ON *.* TO root@'%' IDENTIFIED BY '$MYSQL_PASSWORD'; FLUSH PRIVILEGES;";
+# Make DB accessible through VPC
+echo "bind-address=${LOCAL_IP}" >> /etc/my.cnf
+
+# Import DB
+mysql -uroot -p"${MYSQL_DEFAULT_PASSWORD}" < "${DATADIR}/data/employees.sql";
+
+# Grant premission & change default passowrd
+
+# * CREATE USER 'dms'@'%' IDENTIFIED BY 'password';
+# * GRANT ALL PRIVILEGES ON *.* TO 'dms'@'%' WITH GRANT OPTION;
+
+# ! mysql -uroot -p"${MYSQL_DEFAULT_PASSWORD}" -e "GRANT ALL ON *.* TO root@'%' IDENTIFIED BY '${MYSQL_NEW_PASSWORD}'; FLUSH PRIVILEGES;";
 
 systemctl restart mysqld

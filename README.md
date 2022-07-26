@@ -3,16 +3,12 @@
 ## Overview Architecture
 
 <p align="center">
-  <img width="500" height="auto" src="docs/assets/ec2-webserver.png" alt="EC2 Web Server Architecture">
+  <img width="500" height="auto" src="docs/assets/ec2-rds.png" alt="EC2-RDS Architecture">
 </p>
 
-This project creates:
+This project used to simulate database migration using [AWS DMS](https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html). Some of the resources created are RDS Aurora for MySQL and an EC2 instance that have installed mysql server, both resources are publicly accessible.
 
-- A new VPC
-- One public Subnet
-- A security group
-- An EC2 instance that running web server using nginx
-- Setup web server and deploy an App using custom [user data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) that stored in `user-data/setup.sh`
+> Please note that the source code here is only used for experimental purposes. Never use it for dev or production.
 
 </br>
 
@@ -21,6 +17,9 @@ This project creates:
 - `SyntheticodeStack.DownloadKeypaircommand` = The command needed to Download the private key that was created.
 - `SyntheticodeStack.IPAddress` = Public IP Address of instance.
 - `SyntheticodeStack.SSHCommand` = The command used to connect to the instance.
+- `SyntheticodeStack.DBClusterEndpoint` = RDS endpoint and port.
+- `SyntheticodeStack.DBSecretName` = Secret Name that store user auth for RDS.
+- `SyntheticodeStack.DBGetAuth` = The command used to retrieve user auth.
 
 </br>
 
@@ -46,7 +45,34 @@ To connect the instance:
    $ ssh -i cdk-key.pem ec2-user@11.11.11.11
    ```
 
-</br>
+   </br>
+
+## How to access RDS Database
+
+To connect RDS database:
+
+1. Get secret name from stack's output `SyntheticodeStack.DBSecretName`.
+
+2. Retrieve database authentication such as username, password, hostname and port using [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html), for `--secret-id` value, use `SyntheticodeStack.DBSecretName`.
+
+   ```bash
+   aws secretsmanager get-secret-value \
+    --secret-id your-secret-key-from-stacks-output \
+    --output json > dbAuthInfo.txt
+
+    # For example
+   aws secretsmanager get-secret-value \
+    --secret-id DMSSecret \
+    --output json > dbAuthInfo.txt
+   ```
+
+3. Connect to database using authentication which has been saved in `dbAuthInfo.txt` using this command:
+
+   ```bash
+   mysql -h <host> -P <port> -u <username> -p <password>
+   ```
+
+   </br>
 
 ## Useful commands
 

@@ -1,8 +1,12 @@
 # CDK TypeScript project
 
-This is a boilerplate project for CDK development with TypeScript. Please check another branch/tag for actual projects.
+This CDK project builds an ECS Cluster with one task definition that run task on instance that are AWS-Managed using Fargate.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+> The `cdk.json` file tells the CDK Toolkit how to execute your app.
+
+## Output
+
+- `Service Name` = ECS Service name
 
 ## Useful commands
 

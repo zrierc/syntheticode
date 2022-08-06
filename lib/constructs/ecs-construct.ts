@@ -47,7 +47,6 @@ export class EcsConstruct extends Construct {
         {
           protocol: ecs.Protocol.TCP,
           containerPort: 80,
-          hostPort: 8080, // ! Need to review
         },
       ],
     });

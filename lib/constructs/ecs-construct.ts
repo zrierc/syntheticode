@@ -13,13 +13,17 @@ export interface EcsConstructProps extends StackProps {
 }
 
 export class EcsConstruct extends Construct {
+  public readonly cluster: ecs.Cluster;
+
+  public readonly service: ecs.FargateService;
+
   public taskDefinition: ecs.TaskDefinition;
 
   constructor(scope: Construct, id: string, props: EcsConstructProps) {
     super(scope, id);
 
     // * Define Cluster
-    const cluster = new ecs.Cluster(this, 'test-cluster', {
+    this.cluster = new ecs.Cluster(this, 'test-cluster', {
       vpc: props.vpc,
     });
 
@@ -49,8 +53,8 @@ export class EcsConstruct extends Construct {
     });
 
     // * Define serverless service
-    const service = new ecs.FargateService(this, 'test-service', {
-      cluster,
+    this.service = new ecs.FargateService(this, 'test-service', {
+      cluster: this.cluster,
       taskDefinition: this.taskDefinition,
       desiredCount: 2,
       circuitBreaker: { rollback: true },

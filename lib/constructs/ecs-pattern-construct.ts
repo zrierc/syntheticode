@@ -1,5 +1,8 @@
 import { Construct } from 'constructs';
 import { Vpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { SslPolicy } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecsPattern from 'aws-cdk-lib/aws-ecs-patterns';
 import { StackProps } from 'aws-cdk-lib';
@@ -49,6 +52,27 @@ export interface EcsPatternProps extends StackProps {
    * @type {ISecurityGroup[]}
    */
   securityGroup?: ISecurityGroup[];
+
+  /**
+   *	The domain name for the service.
+   *
+   * @type {string}
+   */
+  domainName?: string;
+
+  /**
+   * The Route53 hosted zone for the domain.
+   *
+   * @type {HostedZone}
+   */
+  domainZone?: HostedZone;
+
+  /**
+   * 	Certificate Manager certificate to associate with the load balancer.
+   *
+   * @type {Certificate}
+   */
+  certificate?: Certificate;
 }
 
 export class EcsPattern extends Construct {
@@ -74,6 +98,11 @@ export class EcsPattern extends Construct {
         enableECSManagedTags: true,
         enableExecuteCommand: true,
         securityGroups: props?.securityGroup,
+        // (optional) Add domain and setup ssl
+        domainName: props?.domainName,
+        domainZone: props?.domainZone,
+        certificate: props?.certificate,
+        sslPolicy: SslPolicy.RECOMMENDED_TLS,
       }
     );
   }

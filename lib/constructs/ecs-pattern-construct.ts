@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { Vpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, ISecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { SslPolicy } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -8,14 +8,6 @@ import * as ecsPattern from 'aws-cdk-lib/aws-ecs-patterns';
 import { StackProps } from 'aws-cdk-lib';
 
 export interface EcsPatternProps extends StackProps {
-  /**
-   * 	The VPC where the container instances will be launched.
-   *
-   * @type {Vpc}
-   * @required
-   */
-  vpc: Vpc;
-
   /**
    * The name of the cluster that hosts the service.
    *
@@ -33,11 +25,20 @@ export interface EcsPatternProps extends StackProps {
   taskImageOptions: ecsPattern.ApplicationLoadBalancedTaskImageOptions;
 
   /**
+   * The subnets to associate with the service.
+   *
+   * @type {SubnetSelection}
+   * @required
+   */
+  taskSubnets: SubnetSelection;
+
+  /**
    * The name of the service.
    *
    * @type {string}
+   * @required
    */
-  serviceName?: string;
+  serviceName: string;
 
   /**
    * Listener port of the application load balancer that will serve traffic to the service.
@@ -73,6 +74,13 @@ export interface EcsPatternProps extends StackProps {
    * @type {Certificate}
    */
   certificate?: Certificate;
+
+  /**
+   * The security policy that defines which ciphers and protocols are supported by the ALB Listener.
+   *
+   * @type {SslPolicy}
+   */
+  sslPolicy?: SslPolicy;
 }
 
 export class EcsPattern extends Construct {
@@ -87,9 +95,9 @@ export class EcsPattern extends Construct {
       'workshopService',
       {
         cluster: props.cluster,
-        vpc: props.vpc,
         taskImageOptions: props.taskImageOptions,
-        serviceName: props?.serviceName,
+        taskSubnets: props.taskSubnets,
+        serviceName: props.serviceName,
         loadBalancerName: `${props?.serviceName}-EcsLoadBalancer`,
         cpu: 512,
         memoryLimitMiB: 1024,
@@ -102,7 +110,7 @@ export class EcsPattern extends Construct {
         domainName: props?.domainName,
         domainZone: props?.domainZone,
         certificate: props?.certificate,
-        sslPolicy: SslPolicy.RECOMMENDED_TLS,
+        sslPolicy: props?.sslPolicy, // SslPolicy.RECOMMENDED_TLS
       }
     );
   }

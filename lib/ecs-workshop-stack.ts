@@ -37,5 +37,25 @@ export class EcsWorkshopStack extends cdk.Stack {
         subnetGroupName: 'private',
       },
     });
+
+    // * Tagging resources
+    cdk.Tags.of(network).add('Author', 'anak-magang');
+    cdk.Tags.of(workshopcluster).add('Author', 'anak-magang');
+    cdk.Tags.of(workshopService).add('Author', 'anak-magang');
+
+    // * Output resources
+    new cdk.CfnOutput(this, 'ALB Endpoint', {
+      value: workshopService.workshopService.loadBalancer.loadBalancerDnsName,
+    });
+
+    /*
+    TODO: Here's todo list that need to be done in 2 days
+    - create scaling policy
+    - change to port 3000
+    - add up to 5 container but running only 2 fargate
+
+    - add custom domain
+    - add another service (with go/gin-gonic)
+     */
   }
 }

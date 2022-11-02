@@ -21,16 +21,21 @@ export class EcsWorkshopStack extends cdk.Stack {
     // * Define service + load balancer
     const workshopService = new EcsPattern(this, 'workshopService', {
       cluster: workshopcluster.ecsCluster,
-      vpc: network.vpc,
+      serviceName: 'front-end-services-group',
       // See reference below to see taskImageOptions properties
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedTaskImageOptions.html
       taskImageOptions: {
-        image: ecs.ContainerImage.fromRegistry('lorem/ipsum'), // ! need to change to proper image
+        image: ecs.ContainerImage.fromRegistry('xzrie/simple-next:1.1'),
         containerName: 'front-end_workshop',
         family: 'front-end-services',
+        containerPort: 80,
+        environment: {
+          PORT: '80',
+        },
+      },
+      taskSubnets: {
+        subnetGroupName: 'private',
       },
     });
-
-    // ! need to add output e.g alb endpoint, cluster name, etc
   }
 }

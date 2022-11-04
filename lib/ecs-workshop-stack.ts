@@ -21,7 +21,7 @@ export class EcsWorkshopStack extends cdk.Stack {
     // * Define service + load balancer
     const workshopService = new EcsPattern(this, 'workshopService', {
       cluster: workshopcluster.ecsCluster,
-      serviceName: 'front-end-services-group',
+      serviceName: 'fe-services',
       // See reference below to see taskImageOptions properties
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedTaskImageOptions.html
       taskImageOptions: {

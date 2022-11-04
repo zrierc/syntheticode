@@ -4,6 +4,7 @@ import { VpcConstruct } from './constructs/network-construct';
 import { EcsCluster } from './constructs/ecs-cluster-construct';
 import { EcsPattern } from './constructs/ecs-pattern-construct';
 import { Construct } from 'constructs';
+import { Duration } from 'aws-cdk-lib';
 
 export class EcsWorkshopStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -18,24 +19,37 @@ export class EcsWorkshopStack extends cdk.Stack {
       clusterName: 'cluster-workshop',
     });
 
-    // * Define service + load balancer
+    // * Define front-end service + load balancer
     const workshopService = new EcsPattern(this, 'workshopService', {
       cluster: workshopcluster.ecsCluster,
-      serviceName: 'fe-services',
+      serviceName: 'fe-service',
       // See reference below to see taskImageOptions properties
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedTaskImageOptions.html
       taskImageOptions: {
         image: ecs.ContainerImage.fromRegistry('xzrie/simple-next:1.1'),
         containerName: 'front-end_workshop',
         family: 'front-end-services',
-        containerPort: 80,
+        containerPort: 3000,
         environment: {
-          PORT: '80',
+          PORT: '3000',
         },
       },
       taskSubnets: {
         subnetGroupName: 'private',
       },
+    });
+
+    // * Define front-end service scaling policy
+    const scalableFrontEndTarget =
+      workshopService.workshopService.service.autoScaleTaskCount({
+        minCapacity: 1,
+        maxCapacity: 5,
+      });
+
+    scalableFrontEndTarget.scaleOnCpuUtilization('CpuScaling', {
+      targetUtilizationPercent: 30,
+      scaleInCooldown: Duration.seconds(90),
+      scaleOutCooldown: Duration.seconds(60),
     });
 
     // * Tagging resources
@@ -50,8 +64,6 @@ export class EcsWorkshopStack extends cdk.Stack {
 
     /*
     TODO: Here's todo list that need to be done in 2 days
-    - create scaling policy
-    - change to port 3000
     - add up to 5 container but running only 2 fargate
 
     - add custom domain

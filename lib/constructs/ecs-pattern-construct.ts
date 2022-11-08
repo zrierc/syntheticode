@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
-import { Vpc, ISecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { HostedZone } from 'aws-cdk-lib/aws-route53';
-import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { ISecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { SslPolicy } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecsPattern from 'aws-cdk-lib/aws-ecs-patterns';
@@ -66,14 +66,14 @@ export interface EcsPatternProps extends StackProps {
    *
    * @type {HostedZone}
    */
-  domainZone?: HostedZone;
+  domainZone?: IHostedZone;
 
   /**
    * 	Certificate Manager certificate to associate with the load balancer.
    *
    * @type {Certificate}
    */
-  certificate?: Certificate;
+  certificate?: ICertificate;
 
   /**
    * The security policy that defines which ciphers and protocols are supported by the ALB Listener.
@@ -98,7 +98,7 @@ export class EcsPattern extends Construct {
         taskImageOptions: props.taskImageOptions,
         taskSubnets: props.taskSubnets,
         serviceName: props.serviceName,
-        loadBalancerName: `${props?.serviceName}-EcsLoadBalancer`,
+        loadBalancerName: `${props?.serviceName}-EcsALB`,
         cpu: 512,
         memoryLimitMiB: 1024,
         listenerPort: props?.listenerPort,
@@ -110,7 +110,7 @@ export class EcsPattern extends Construct {
         domainName: props?.domainName,
         domainZone: props?.domainZone,
         certificate: props?.certificate,
-        sslPolicy: props?.sslPolicy, // SslPolicy.RECOMMENDED_TLS
+        sslPolicy: props?.sslPolicy,
       }
     );
   }

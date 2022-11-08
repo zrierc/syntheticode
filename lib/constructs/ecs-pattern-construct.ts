@@ -55,6 +55,13 @@ export interface EcsPatternProps extends StackProps {
   securityGroup?: ISecurityGroup[];
 
   /**
+   * Specifies whether the load balancer should redirect traffic on port 80 to port 443 to support HTTP->HTTPS redirects This is only valid if the protocol of the ALB is HTTPS.
+   *
+   * @type {boolean}
+   */
+  redirectHTTP?: boolean;
+
+  /**
    *	The domain name for the service.
    *
    * @type {string}
@@ -107,6 +114,7 @@ export class EcsPattern extends Construct {
         enableExecuteCommand: true,
         securityGroups: props?.securityGroup,
         // (optional) Add domain and setup ssl
+        redirectHTTP: props?.redirectHTTP,
         domainName: props?.domainName,
         domainZone: props?.domainZone,
         certificate: props?.certificate,

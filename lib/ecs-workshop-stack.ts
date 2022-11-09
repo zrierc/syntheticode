@@ -26,11 +26,11 @@ export class EcsWorkshopStack extends cdk.Stack {
     const domainZone = route53.HostedZone.fromLookup(this, 'Zone', {
       domainName: 'zrierc.systems',
     });
-    // const certificate = acm.Certificate.fromCertificateArn(
-    //   this,
-    //   'Cert',
-    //   'arn:aws:acm:us-east-1:838928449797:certificate/7f770c64-03a6-4746-ad6c-87f2b8df5803'
-    // );
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      'Cert',
+      'arn:aws:acm:ap-southeast-1:838928449797:certificate/63f15fab-0b44-4b8b-be6f-c435e096175a'
+    );
 
     // * Define front-end service, load balancer, scaling policy
     const frontEndService = new EcsPattern(this, 'frontEndService', {
@@ -50,11 +50,11 @@ export class EcsWorkshopStack extends cdk.Stack {
       taskSubnets: {
         subnetGroupName: 'private-fe',
       },
-      // redirectHTTP: true,
-      // domainName: 'web.zrierc.systems',
-      // certificate,
-      // domainZone,
-      // sslPolicy: SslPolicy.RECOMMENDED_TLS,
+      redirectHTTP: true,
+      domainName: 'web.zrierc.systems',
+      certificate,
+      domainZone,
+      sslPolicy: SslPolicy.RECOMMENDED,
     });
 
     const scalableFrontEndTarget =
@@ -82,11 +82,11 @@ export class EcsWorkshopStack extends cdk.Stack {
       taskSubnets: {
         subnetGroupName: 'private-api',
       },
-      // redirectHTTP: true,
-      // domainName: 'api.zrierc.systems',
-      // certificate,
-      // domainZone,
-      // sslPolicy: SslPolicy.RECOMMENDED_TLS,
+      redirectHTTP: true,
+      domainName: 'api.zrierc.systems',
+      certificate,
+      domainZone,
+      sslPolicy: SslPolicy.RECOMMENDED,
     });
 
     const scalableApiTarget =
@@ -114,13 +114,5 @@ export class EcsWorkshopStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'ALB-API Endpoint', {
       value: apiService.workshopService.loadBalancer.loadBalancerName,
     });
-
-    /*
-    TODO: Here's todo list that need to be done in 2 days
-    - add up to 5 container but running only 2 fargate
-
-    - add custom domain
-    - add another service (with go/gin-gonic)
-     */
   }
 }

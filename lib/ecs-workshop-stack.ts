@@ -26,11 +26,11 @@ export class EcsWorkshopStack extends cdk.Stack {
     const domainZone = route53.HostedZone.fromLookup(this, 'Zone', {
       domainName: 'zrierc.systems',
     });
-    const certificate = acm.Certificate.fromCertificateArn(
-      this,
-      'Cert',
-      'arn:aws:acm:us-east-1:838928449797:certificate/a26e792c-41e4-4375-b4ec-70c5b3fd22b6'
-    );
+    // const certificate = acm.Certificate.fromCertificateArn(
+    //   this,
+    //   'Cert',
+    //   'arn:aws:acm:us-east-1:838928449797:certificate/7f770c64-03a6-4746-ad6c-87f2b8df5803'
+    // );
 
     // * Define front-end service, load balancer, scaling policy
     const frontEndService = new EcsPattern(this, 'frontEndService', {
@@ -48,12 +48,13 @@ export class EcsWorkshopStack extends cdk.Stack {
         },
       },
       taskSubnets: {
-        subnetGroupName: 'private',
+        subnetGroupName: 'private-fe',
       },
-      domainName: 'web.zrierc.systems',
-      certificate,
-      domainZone,
-      sslPolicy: SslPolicy.RECOMMENDED_TLS,
+      // redirectHTTP: true,
+      // domainName: 'web.zrierc.systems',
+      // certificate,
+      // domainZone,
+      // sslPolicy: SslPolicy.RECOMMENDED_TLS,
     });
 
     const scalableFrontEndTarget =
@@ -68,15 +69,52 @@ export class EcsWorkshopStack extends cdk.Stack {
       scaleOutCooldown: Duration.seconds(60),
     });
 
+    // * Define API Service, load balancer, scaling policy
+    const apiService = new EcsPattern(this, 'apiService', {
+      cluster: workshopcluster.ecsCluster,
+      serviceName: 'api-service',
+      taskImageOptions: {
+        image: ecs.ContainerImage.fromRegistry('xzrie/simple-gin:1.0'),
+        containerName: 'api_workshop',
+        family: 'api-services',
+        containerPort: 8080,
+      },
+      taskSubnets: {
+        subnetGroupName: 'private-api',
+      },
+      // redirectHTTP: true,
+      // domainName: 'api.zrierc.systems',
+      // certificate,
+      // domainZone,
+      // sslPolicy: SslPolicy.RECOMMENDED_TLS,
+    });
+
+    const scalableApiTarget =
+      apiService.workshopService.service.autoScaleTaskCount({
+        minCapacity: 1,
+        maxCapacity: 5,
+      });
+
+    scalableApiTarget.scaleOnCpuUtilization('CpuScalingForApi', {
+      targetUtilizationPercent: 30,
+      scaleInCooldown: Duration.seconds(90),
+      scaleOutCooldown: Duration.seconds(60),
+    });
+
     // * Tagging resources
     cdk.Tags.of(network).add('Author', 'anak-magang');
     cdk.Tags.of(workshopcluster).add('Author', 'anak-magang');
     cdk.Tags.of(frontEndService).add('Author', 'anak-magang');
+    cdk.Tags.of(apiService).add('Author', 'anak-magang');
 
     // * Output resources
     new cdk.CfnOutput(this, 'ALB Front-End Endpoint', {
       value: frontEndService.workshopService.loadBalancer.loadBalancerDnsName,
     });
+    new cdk.CfnOutput(this, 'ALB-API Endpoint', {
+      value: apiService.workshopService.loadBalancer.loadBalancerName,
+    });
+
     /*
     TODO: Here's todo list that need to be done in 2 days
     - add up to 5 container but running only 2 fargate
